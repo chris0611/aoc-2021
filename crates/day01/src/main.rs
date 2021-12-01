@@ -42,4 +42,13 @@ mod tests {
         assert_eq!(expected, actual);
 
     }
+
+    #[test]
+    fn part_b() {
+        let expected = 5;
+        let actual = day01b(TEST_INPUT);
+
+        assert_eq!(expected, actual);
+
+    }
 }
