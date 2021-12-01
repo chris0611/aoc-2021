@@ -19,7 +19,7 @@ fn day01b(input: &'static str) -> usize {
     input
         .lines()
         .map(|x| x.parse::<i32>().unwrap())
-        .collect::<Vec<i32>>()
+        .collect::<Vec<_>>()
         .windows(3)
         .map(|x| x.iter().sum())
         .collect::<Vec<i32>>()
@@ -29,7 +29,6 @@ fn day01b(input: &'static str) -> usize {
 }
 
 #[cfg(test)]
-
 mod tests {
     use super::*;
     const TEST_INPUT: &'static str = include_str!("../test.txt");
