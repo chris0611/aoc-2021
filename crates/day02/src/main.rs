@@ -12,11 +12,11 @@ fn day02a(input: &'static str) -> usize {
     input
         .lines()
         .map(|x| x.split(' ').collect::<Vec<_>>())
-        .map(|z| (z[0], z[1].parse::<u64>().unwrap()))
-        .for_each(|(x, y)| match x {
-            "forward" => h_pos += y,
-            "down" => depth += y,
-            "up" => depth -= y,
+        .map(|z| (z[0], z[1].parse::<i64>().unwrap()))
+        .for_each(|(x, y)| match x.as_bytes()[0] {
+            b'f' => h_pos += y,
+            b'd' => depth += y,
+            b'u' => depth -= y,
             _ => (),
         });
 
@@ -31,19 +31,20 @@ fn day02b(input: &'static str) -> usize {
     input
         .lines()
         .map(|x| x.split(' ').collect::<Vec<_>>())
-        .map(|z| (z[0], z[1].parse::<u64>().unwrap()))
-        .for_each(|(x, y)| match x {
-            "forward" => {
+        .map(|z| (z[0], z[1].parse::<i64>().unwrap()))
+        .for_each(|(x, y)| match x.as_bytes()[0] {
+            b'f' => {
                 h_pos += y;
                 depth += aim * y;
             }
-            "down" => aim += y,
-            "up" => aim -= y,
+            b'd' => aim += y,
+            b'u' => aim -= y,
             _ => (),
         });
 
     h_pos as usize * depth as usize
 }
+
 
 #[cfg(test)]
 mod tests {
