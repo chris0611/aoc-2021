@@ -9,16 +9,16 @@ fn day02a(input: &'static str) -> usize {
     let mut h_pos = 0;
     let mut depth = 0;
 
-    input
-        .lines()
-        .map(|x| x.split(' ').collect::<Vec<_>>())
-        .map(|z| (z[0], z[1].parse::<i64>().unwrap()))
-        .for_each(|(x, y)| match x.as_bytes()[0] {
-            b'f' => h_pos += y,
-            b'd' => depth += y,
-            b'u' => depth -= y,
+    input.lines().for_each(|line| {
+        let (ins, amt) = line.split_once(' ').unwrap();
+        let n: i64 = amt.parse().unwrap();
+        match ins.as_bytes()[0] {
+            b'f' => h_pos += n,
+            b'd' => depth += n,
+            b'u' => depth -= n,
             _ => (),
-        });
+        }
+    });
 
     h_pos as usize * depth as usize
 }
@@ -28,19 +28,19 @@ fn day02b(input: &'static str) -> usize {
     let mut depth = 0;
     let mut aim = 0;
 
-    input
-        .lines()
-        .map(|x| x.split(' ').collect::<Vec<_>>())
-        .map(|z| (z[0], z[1].parse::<i64>().unwrap()))
-        .for_each(|(x, y)| match x.as_bytes()[0] {
+    input.lines().for_each(|line| {
+        let (ins, amt) = line.split_once(' ').unwrap();
+        let n: i64 = amt.parse().unwrap();
+        match ins.as_bytes()[0] {
             b'f' => {
-                h_pos += y;
-                depth += aim * y;
+                h_pos += n;
+                depth += aim * n;
             }
-            b'd' => aim += y,
-            b'u' => aim -= y,
+            b'd' => aim += n,
+            b'u' => aim -= n,
             _ => (),
-        });
+        }
+    });
 
     h_pos as usize * depth as usize
 }
