@@ -45,7 +45,6 @@ fn day02b(input: &'static str) -> usize {
     h_pos as usize * depth as usize
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
