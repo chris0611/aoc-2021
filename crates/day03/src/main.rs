@@ -2,6 +2,7 @@ const INPUT: &str = include_str!("../input.txt");
 
 fn main() {
     println!("{}", day03a(INPUT));
+    println!("{}", day03b(INPUT));
 }
 
 fn day03a(input: &str) -> u64 {
@@ -45,6 +46,75 @@ fn day03a(input: &str) -> u64 {
     gamma * epsilon
 }
 
+fn day03b(input: &str) -> u64 {
+    let nums: Vec<&str> = input.lines().collect();
+
+    let oxy = helper_oxy(&nums, 0);
+    let co2 = helper_co2(&nums, 0);
+
+    oxy * co2
+}
+
+fn helper_oxy(input: &Vec<&str>, start: usize) -> u64 {
+    if input.len() == 1 {
+        return binstr_to_num(input[0]);
+    }
+
+    let mut nums: Vec<&str> = Vec::new();
+    let mut ones: Vec<usize> = Vec::new();
+    let mut zeros: Vec<usize> = Vec::new();
+
+    for (i, &num) in input.iter().enumerate() {
+        match num.as_bytes()[start] {
+            b'1' => ones.push(i),
+            b'0' => zeros.push(i),
+            _ => (),
+        }
+    }
+
+    if ones.len() >= zeros.len() {
+        for index in ones {
+            nums.push(input[index]);
+        }
+    } else {
+        for index in zeros {
+            nums.push(input[index]);
+        }
+    }
+
+    helper_oxy(&nums, start + 1)
+}
+
+fn helper_co2(input: &Vec<&str>, start: usize) -> u64 {
+    if input.len() == 1 {
+        return binstr_to_num(input[0]);
+    }
+
+    let mut nums: Vec<&str> = Vec::new();
+    let mut ones: Vec<usize> = Vec::new();
+    let mut zeros: Vec<usize> = Vec::new();
+
+    for (i, &num) in input.iter().enumerate() {
+        match num.as_bytes()[start] {
+            b'1' => ones.push(i),
+            b'0' => zeros.push(i),
+            _ => (),
+        }
+    }
+
+    if zeros.len() <= ones.len() {
+        for index in zeros {
+            nums.push(input[index]);
+        }
+    } else {
+        for index in ones {
+            nums.push(input[index]);
+        }
+    }
+
+    helper_co2(&nums, start + 1)
+}
+
 fn binstr_to_num(s: &str) -> u64 {
     s.bytes().enumerate().fold(0, |mut num, (i, b)| {
         match b {
@@ -64,6 +134,14 @@ mod tests {
     fn part_a() {
         let expected = 198;
         let actual = day03a(TEST_INPUT);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn part_b() {
+        let expected = 230;
+        let actual = day03b(TEST_INPUT);
 
         assert_eq!(expected, actual);
     }
