@@ -16,30 +16,14 @@ fn solution(input: &str, days: i32) -> u64 {
         .iter()
         .for_each(|&fish| state_count[fish as usize] += 1);
 
-    let mut population = init_state.len() as u64;
-
     for _ in 0..days {
-        let mut carry = 0;
+        let inc = state_count[0];
 
-        for time in (0..=8).rev() {
-            match time {
-                0 => {
-                    population += state_count[0];
-                    state_count[8] += state_count[0];
-                    state_count[6] += state_count[0];
-                    state_count[0] = carry;
-                }
-                1..=8 => {
-                    let tmp = state_count[time];
-                    state_count[time] = carry;
-                    carry = tmp;
-                }
-                _ => (),
-            }
-        }
+        state_count.rotate_left(1);
+        state_count[6] += inc;
     }
 
-    population
+    state_count.iter().sum()
 }
 
 #[cfg(test)]
