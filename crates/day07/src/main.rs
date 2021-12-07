@@ -28,19 +28,14 @@ fn day07b(input: &str) -> i32 {
     let mean_c = mean.ceil() as i32;
     let mean_f = mean.floor() as i32;
 
-    let sum_c: i32 = nums
-        .iter()
-        .fold(0, |sum, &n| {
-            let dist = (n - mean_c).abs();
-            sum + (dist * (dist + 1) / 2)
-        });
-
-    let sum_f: i32 = nums
-        .iter()
-        .fold(0, |sum, &n| {
-            let dist = (n - mean_f).abs();
-            sum + (dist * (dist + 1) / 2)
-        });
+    let (sum_c, sum_f) = nums.iter().fold((0, 0), |(s_c, s_f), &n| {
+        let dist_c = (n - mean_c).abs();
+        let dist_f = (n - mean_f).abs();
+        (
+            (s_c + (dist_c * (dist_c + 1) / 2)),
+            (s_f + (dist_f * (dist_f + 1) / 2)),
+        )
+    });
 
     sum_c.min(sum_f)
 }
