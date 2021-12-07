@@ -30,19 +30,17 @@ fn day07b(input: &str) -> i32 {
 
     let sum_c: i32 = nums
         .iter()
-        .map(|&n| {
-            let distance = (n - mean_c).abs();
-            distance * (distance + 1) / 2
-        })
-        .sum();
+        .fold(0, |sum, &n| {
+            let dist = (n - mean_c).abs();
+            sum + (dist * (dist + 1) / 2)
+        });
 
     let sum_f: i32 = nums
         .iter()
-        .map(|&n| {
-            let distance = (n - mean_f).abs();
-            distance * (distance + 1) / 2
-        })
-        .sum();
+        .fold(0, |sum, &n| {
+            let dist = (n - mean_f).abs();
+            sum + (dist * (dist + 1) / 2)
+        });
 
     sum_c.min(sum_f)
 }
