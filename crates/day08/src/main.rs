@@ -1,17 +1,11 @@
 const INPUT: &str = include_str!("../input.txt");
 
-const A: u8 = 0x01;
-const B: u8 = 0x02;
-const C: u8 = 0x04;
-const E: u8 = 0x10;
-const F: u8 = 0x20;
-
 fn main() {
     println!("{}", day08a(INPUT));
     println!("{}", day08b(INPUT));
 }
 
-fn day08a(input: &str) -> i32 {
+fn day08a(input: &str) -> usize {
     process_input(input).into_iter().fold(0, |cnt, (_, out)| {
         cnt + out
             .split_whitespace()
@@ -20,24 +14,22 @@ fn day08a(input: &str) -> i32 {
                 _ => false,
             })
             .count()
-    }) as i32
+    })
 }
 
-fn day08b(input: &str) -> i32 {
-    let parsed = process_input(input);
+fn day08b(input: &str) -> usize {
+    process_input(input).into_iter().fold(0, |res, (seg, out)| {
+        let nums = seg.split_ascii_whitespace().collect::<Vec<_>>();
 
-    let mut result = 0;
+        let one = get_len(&nums, 2);
+        let four = get_len(&nums, 4);
 
-    for &disp in parsed.iter() {
-        let notes = disp.0.split_ascii_whitespace().collect::<Vec<_>>();
-        let digits = disp.1.split_ascii_whitespace().collect::<Vec<_>>();
+        res + decode(out, four, one)
+    })
+}
 
-        let output = decode(&notes, &digits);
-
-        result += output;
-    }
-
-    result
+fn get_len<'a>(nums: &Vec<&'a str>, len: usize) -> &'a str {
+    nums.into_iter().find(|&&n| n.len() == len).unwrap()
 }
 
 fn process_input(input: &str) -> Vec<(&str, &str)> {
@@ -47,152 +39,32 @@ fn process_input(input: &str) -> Vec<(&str, &str)> {
         .collect::<Vec<_>>()
 }
 
-fn decode(notes: &Vec<&str>, output: &Vec<&str>) -> i32 {
-    const LEN_FIVES: [u8; 3] = [2, 3, 5];
-    const MIN_FIVES: [&str; 3] = ["ace", "acf", "abf"];
-    const LEN_SIXES: [u8; 3] = [0, 6, 9];
-    const MIN_SIXES: [&str; 3] = ["abcef", "abef", "abcf"];
+fn decode(s: &str, four: &str, one: &str) -> usize {
+    let disp = s.split_whitespace().collect::<Vec<_>>();
 
-    let mut mapping: [u8; 7] = [0x7F; 7];
-    let mut freq = [0; 7];
-
-    notes
-        .iter()
-        .for_each(|&s| s.bytes().for_each(|b| freq[(b - 97) as usize] += 1));
-
-    freq.iter().enumerate().for_each(|(i, &n)| match n {
-        4 => {
-            solved_bit(&mut mapping, i, E);
-        }
-        6 => {
-            solved_bit(&mut mapping, i, B);
-        }
-        9 => {
-            solved_bit(&mut mapping, i, F);
-        }
-        _ => (),
-    });
-
-    let &one = notes.iter().find(|note| note.len() == 2).unwrap();
-    let &seven = notes.iter().find(|note| note.len() == 3).unwrap();
-
-    for c in one.chars() {
-        if !char_solved(&mapping, c) {
-            solved_bit(&mut mapping, c as usize - 97, C);
-        }
-    }
-
-    for c in seven.chars() {
-        if !char_solved(&mapping, c) {
-            solved_bit(&mut mapping, c as usize - 97, A);
-        }
-    }
-
-    let solved_segments = solved_rows(&mapping);
-
-    let mut display = String::new();
-
-    for &digit in output {
-        match digit.len() {
-            2 => display.push('1'),
-            3 => display.push('7'),
-            4 => display.push('4'),
-            7 => display.push('8'),
-            5 => {
-                let mut solved_in = Vec::new();
-
-                for c in digit.chars() {
-                    for (to, from) in solved_segments.iter() {
-                        if c == *to {
-                            solved_in.push(*from);
-                        }
-                    }
-                }
-
-                solved_in.sort_unstable();
-                let mut sorted_str = String::new();
-
-                for c in solved_in {
-                    sorted_str.push(c);
-                }
-
-                for (i, &min_s) in MIN_FIVES.iter().enumerate() {
-                    if sorted_str.eq(min_s) {
-                        display.push_str(&LEN_FIVES[i].to_string());
-                    }
-                }
-            }
-            6 => {
-                let mut solved_in = Vec::new();
-
-                for c in digit.chars() {
-                    for (to, from) in solved_segments.iter() {
-                        if c == *to {
-                            solved_in.push(*from);
-                        }
-                    }
-                }
-
-                solved_in.sort_unstable();
-                let mut sorted_str = String::new();
-
-                for c in solved_in {
-                    sorted_str.push(c);
-                }
-
-                for (i, &min_s) in MIN_SIXES.iter().enumerate() {
-                    if sorted_str.eq(min_s) {
-                        display.push_str(&LEN_SIXES[i].to_string());
-                    }
-                }
-            }
-            _ => (),
-        }
-    }
-
-    display.parse::<i32>().unwrap()
+    disp.into_iter().enumerate().fold(0, |a, (i, d)| {
+        a + decode_seg(d, &four, &one) * (10usize.pow(3 - i as u32))
+    })
 }
 
-// Helper functions
-fn solved_rows(mapping: &[u8; 7]) -> Vec<(char, char)> {
-    let mut chars = Vec::new();
-
-    for (row, &b) in mapping.iter().enumerate() {
-        if b.count_ones() == 1 {
-            let mapped = match b {
-                A => 'a',
-                B => 'b',
-                C => 'c',
-                E => 'e',
-                F => 'f',
-                _ => '?',
-            };
-
-            chars.push(((row as u8 + 97) as char, mapped));
-        }
-    }
-
-    chars
-}
-
-#[inline]
-fn char_solved(mapping: &[u8; 7], c: char) -> bool {
-    if mapping[c as usize - 97].count_ones() == 1 {
-        true
-    } else {
-        false
+fn decode_seg(seg: &str, four: &str, one: &str) -> usize {
+    match (seg.len(), in_common(seg, four), in_common(seg, one)) {
+        (2, _, _) => 1,
+        (3, _, _) => 7,
+        (4, _, _) => 4,
+        (7, _, _) => 8,
+        (5, 2, _) => 2,
+        (5, 3, 1) => 5,
+        (5, 3, 2) => 3,
+        (6, 4, _) => 9,
+        (6, 3, 1) => 6,
+        (6, 3, 2) => 0,
+        (_, _, _) => panic!(),
     }
 }
 
-#[inline]
-fn solved_bit(mapping: &mut [u8; 7], row: usize, bit: u8) {
-    unset_col(mapping, bit);
-    mapping[row] = bit;
-}
-
-#[inline]
-fn unset_col(mapping: &mut [u8; 7], bit: u8) {
-    mapping.iter_mut().for_each(|b| *b &= !bit);
+fn in_common(seg: &str, num: &str) -> usize {
+    num.chars().fold(0, |a, c| a + seg.contains(c) as usize)
 }
 
 #[cfg(test)]
