@@ -8,7 +8,7 @@ fn main() {
 }
 
 fn day09a(input: &str) -> usize {
-    let heightmap: Vec<Vec<u32>> = process_input(input);
+    let heightmap = process_input(input);
 
     let mut result = 0;
 
@@ -103,50 +103,50 @@ fn find_min(arr: &[usize; 3]) -> usize {
     index
 }
 
-fn basin_finder(hm: &Vec<Vec<u32>>, init: (usize, usize)) -> usize {
+fn basin_finder(hm: &Vec<Vec<u8>>, init: (usize, usize)) -> usize {
     let mut found: HashSet<(usize, usize)> = HashSet::new();
 
     found.insert((init.0, init.1));
-    helper(hm, init, &mut found);
+    basin_helper(hm, init, &mut found);
 
     found.len()
 }
 
-fn helper(hm: &Vec<Vec<u32>>, p: (usize, usize), found: &mut HashSet<(usize, usize)>) {
+fn basin_helper(hm: &Vec<Vec<u8>>, p: (usize, usize), found: &mut HashSet<(usize, usize)>) {
     let curr = hm[p.0][p.1];
 
     if p.0 != 0 && !found.contains(&(p.0 - 1, p.1)) {
         if hm[p.0 - 1][p.1] != 9 && hm[p.0 - 1][p.1] > curr {
             found.insert((p.0 - 1, p.1));
-            helper(hm, (p.0 - 1, p.1), found);
+            basin_helper(hm, (p.0 - 1, p.1), found);
         }
     }
 
     if p.1 != 0 && !found.contains(&(p.0, p.1 - 1)) {
         if hm[p.0][p.1 - 1] != 9 && hm[p.0][p.1 - 1] > curr {
             found.insert((p.0, p.1 - 1));
-            helper(hm, (p.0, p.1 - 1), found);
+            basin_helper(hm, (p.0, p.1 - 1), found);
         }
     }
 
     if p.0 != (hm.len() - 1) && !found.contains(&(p.0 + 1, p.1)) {
         if hm[p.0 + 1][p.1] != 9 && hm[p.0 + 1][p.1] > curr {
             found.insert((p.0 + 1, p.1));
-            helper(hm, (p.0 + 1, p.1), found);
+            basin_helper(hm, (p.0 + 1, p.1), found);
         }
     }
     if p.1 != (hm[0].len() - 1) && !found.contains(&(p.0, p.1 + 1)) {
         if hm[p.0][p.1 + 1] != 9 && hm[p.0][p.1 + 1] > curr {
             found.insert((p.0, p.1 + 1));
-            helper(hm, (p.0, p.1 + 1), found);
+            basin_helper(hm, (p.0, p.1 + 1), found);
         }
     }
 }
 
-fn process_input(input: &str) -> Vec<Vec<u32>> {
+fn process_input(input: &str) -> Vec<Vec<u8>> {
     input
         .lines()
-        .map(|line| line.chars().filter_map(|c| c.to_digit(10)).collect())
+        .map(|line| line.as_bytes().into_iter().map(|&b| b - b'0').collect())
         .collect()
 }
 
