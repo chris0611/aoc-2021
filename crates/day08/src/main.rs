@@ -12,20 +12,10 @@ fn main() {
 }
 
 fn day08a(input: &str) -> i32 {
-    let notes = input
-        .lines()
-        .filter_map(|line| line.split_once(" | "))
-        .collect::<Vec<_>>();
-
-    let output = notes
-        .iter()
-        .map(|&n| n.1.split_whitespace().collect::<Vec<_>>())
-        .collect::<Vec<_>>();
-
-    output.iter().fold(0, |cnt, v| {
-        cnt + v
-            .into_iter()
-            .filter(|&&sig| match sig.len() {
+    process_input(input).into_iter().fold(0, |cnt, (_, out)| {
+        cnt + out
+            .split_whitespace()
+            .filter(|&d| match d.len() {
                 2 | 3 | 4 | 7 => true,
                 _ => false,
             })
@@ -34,14 +24,11 @@ fn day08a(input: &str) -> i32 {
 }
 
 fn day08b(input: &str) -> i32 {
-    let displays = input
-        .lines()
-        .filter_map(|line| line.split_once(" | "))
-        .collect::<Vec<_>>();
+    let parsed = process_input(input);
 
     let mut result = 0;
 
-    for &disp in displays.iter() {
+    for &disp in parsed.iter() {
         let notes = disp.0.split_ascii_whitespace().collect::<Vec<_>>();
         let digits = disp.1.split_ascii_whitespace().collect::<Vec<_>>();
 
@@ -53,11 +40,18 @@ fn day08b(input: &str) -> i32 {
     result
 }
 
+fn process_input(input: &str) -> Vec<(&str, &str)> {
+    input
+        .lines()
+        .filter_map(|line| line.split_once(" | "))
+        .collect::<Vec<_>>()
+}
+
 fn decode(notes: &Vec<&str>, output: &Vec<&str>) -> i32 {
     const LEN_FIVES: [u8; 3] = [2, 3, 5];
-    const MIN_FIVES: [&str; 3]  = ["ace", "acf", "abf"];
+    const MIN_FIVES: [&str; 3] = ["ace", "acf", "abf"];
     const LEN_SIXES: [u8; 3] = [0, 6, 9];
-    const MIN_SIXES: [&str; 3]  = ["abcef", "abef", "abcf"];
+    const MIN_SIXES: [&str; 3] = ["abcef", "abef", "abcf"];
 
     let mut mapping: [u8; 7] = [0x7F; 7];
     let mut freq = [0; 7];
@@ -151,7 +145,7 @@ fn decode(notes: &Vec<&str>, output: &Vec<&str>) -> i32 {
                         display.push_str(&LEN_SIXES[i].to_string());
                     }
                 }
-            },
+            }
             _ => (),
         }
     }
