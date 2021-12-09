@@ -78,29 +78,8 @@ fn day09b(input: &str) -> usize {
         }
     }
 
-    let mut max_three = [0; 3];
-
-    basins.into_iter().for_each(|b| {
-        let index = find_min(&max_three);
-        if b > max_three[index] {
-            max_three[index] = b;
-        }
-    });
-
-    max_three.iter().product()
-}
-
-fn find_min(arr: &[usize; 3]) -> usize {
-    let mut lowest = usize::MAX;
-    let mut index = 0;
-
-    for i in 0..3 {
-        if arr[i] < lowest {
-            lowest = arr[i];
-            index = i;
-        }
-    }
-    index
+    basins.sort_unstable();
+    basins.iter().rev().take(3).product()
 }
 
 fn basin_finder(hm: &Vec<Vec<u8>>, init: (usize, usize)) -> usize {
