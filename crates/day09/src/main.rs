@@ -14,28 +14,8 @@ fn day09a(input: &str) -> usize {
 
     for (i, row) in heightmap.iter().enumerate() {
         for (j, &col) in row.iter().enumerate() {
-            if col == 9 {
+            if !is_lowest(&heightmap, (i, j)) {
                 continue;
-            }
-            if i != 0 {
-                if heightmap[i - 1][j] <= col {
-                    continue;
-                }
-            }
-            if j != 0 {
-                if row[j - 1] <= col {
-                    continue;
-                }
-            }
-            if i != heightmap.len() - 1 {
-                if heightmap[i + 1][j] <= col {
-                    continue;
-                }
-            }
-            if j != row.len() - 1 {
-                if row[j + 1] <= col {
-                    continue;
-                }
             }
             result += 1 + col as usize;
         }
@@ -50,29 +30,9 @@ fn day09b(input: &str) -> usize {
     let mut basins: Vec<usize> = Vec::new();
 
     for (i, row) in heightmap.iter().enumerate() {
-        for (j, &col) in row.iter().enumerate() {
-            if col == 9 {
+        for j in 0..row.len() {
+            if !is_lowest(&heightmap, (i, j)) {
                 continue;
-            }
-            if i != 0 {
-                if heightmap[i - 1][j] <= col {
-                    continue;
-                }
-            }
-            if j != 0 {
-                if row[j - 1] <= col {
-                    continue;
-                }
-            }
-            if i != heightmap.len() - 1 {
-                if heightmap[i + 1][j] <= col {
-                    continue;
-                }
-            }
-            if j != row.len() - 1 {
-                if row[j + 1] <= col {
-                    continue;
-                }
             }
             basins.push(basin_finder(&heightmap, (i, j)));
         }
@@ -80,6 +40,36 @@ fn day09b(input: &str) -> usize {
 
     basins.sort_unstable();
     basins.iter().rev().take(3).product()
+}
+
+fn is_lowest(hm: &Vec<Vec<u8>>, p: (usize, usize)) -> bool {
+    let row = &hm[p.0];
+    let col = hm[p.0][p.1];
+
+    if col == 9 {
+        return false;
+    }
+    if p.0 != 0 {
+        if hm[p.0 - 1][p.1] <= col {
+            return false;
+        }
+    }
+    if p.1 != 0 {
+        if row[p.1 - 1] <= col {
+            return false;
+        }
+    }
+    if p.0 != hm.len() - 1 {
+        if hm[p.0 + 1][p.1] <= col {
+            return false;
+        }
+    }
+    if p.1 != row.len() - 1 {
+        if row[p.1 + 1] <= col {
+            return false;
+        }
+    }
+    true
 }
 
 fn basin_finder(hm: &Vec<Vec<u8>>, init: (usize, usize)) -> usize {
