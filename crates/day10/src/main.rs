@@ -9,29 +9,17 @@ fn main() {
 
 fn day10a(input: &str) -> usize {
     let mut chunks: Vec<char> = Vec::new();
-    let mut scores: [usize; 4] = [0, 0, 0, 0];
+    let mut score = 0;
+
+    let matching = HashMap::from([(')', '('), (']', '['), ('}', '{'), ('>', '<')]);
+    let scoring = HashMap::from([(')', 3), (']', 57), ('}', 1197), ('>', 25137)]);
 
     input.lines().for_each(|line| {
         for c in line.chars() {
             match c {
-                ')' => {
-                    if chunks.pop().unwrap() != '(' {
-                        scores[0] += 3;
-                    }
-                }
-                ']' => {
-                    if chunks.pop().unwrap() != '[' {
-                        scores[1] += 57;
-                    }
-                }
-                '}' => {
-                    if chunks.pop().unwrap() != '{' {
-                        scores[2] += 1197;
-                    }
-                }
-                '>' => {
-                    if chunks.pop().unwrap() != '<' {
-                        scores[3] += 25137;
+                ')' | ']' | '}' | '>' => {
+                    if chunks.pop().unwrap() != *matching.get(&c).unwrap() {
+                        score += scoring.get(&c).unwrap();
                     }
                 }
                 b => chunks.push(b),
@@ -40,7 +28,7 @@ fn day10a(input: &str) -> usize {
         chunks.clear();
     });
 
-    scores.iter().sum()
+    score
 }
 
 fn day10b(input: &str) -> usize {
