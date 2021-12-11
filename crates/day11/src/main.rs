@@ -106,7 +106,7 @@ fn update_cell(arr: &mut [[u8; 10]; 10], i: usize, j: usize) {
             if j != 0 {
                 update_cell(arr, i, j - 1);
             }
-            
+
             if j != 9 {
                 update_cell(arr, i, j + 1);
             }
