@@ -10,14 +10,14 @@ fn main() {
 fn day13a(input: &str) -> usize {
     let (dots, folds) = process_input(input);
 
-    fold_paper(&dots, folds[0]).len()
+    fold_paper(dots, folds[0]).len()
 }
 
 fn day13b(input: &str) {
     let (mut dots, folds) = process_input(input);
 
     for fold in folds {
-        dots = fold_paper(&dots, fold)
+        dots = fold_paper(dots, fold);
     }
 
     let mut grid = [[false; 42]; 8];
@@ -29,7 +29,7 @@ fn day13b(input: &str) {
     for row in grid {
         for cell in row {
             let sym = match cell {
-                true => '#',
+                true => '█',
                 false => ' ',
             };
             print!("{}", sym);
@@ -38,33 +38,30 @@ fn day13b(input: &str) {
     }
 }
 
-fn fold_paper(dots: &HashSet<(i32, i32)>, fold: (i32, i32)) -> HashSet<(i32, i32)> {
-    let mut new_dots = HashSet::new();
-
-    for dot in dots.into_iter() {
-        let mut new_dot = (0, 0);
-
-        if dot.0 > fold.0 {
-            let dx = fold.0 - dot.0;
-            new_dot.0 = fold.0 + dx;
-        } else {
-            new_dot.0 = dot.0;
-        }
-
-        if dot.1 > fold.1 {
-            let dy = fold.1 - dot.1;
-            new_dot.1 = fold.1 + dy;
-        } else {
-            new_dot.1 = dot.1;
-        }
-
-        new_dots.insert(new_dot);
-    }
-
-    new_dots
+fn fold_paper(dots: HashSet<(i32, i32)>, fold: (char, i32)) -> HashSet<(i32, i32)> {
+    dots.into_iter()
+        .map(|dot| match fold.0 {
+            'x' => {
+                if dot.0 < fold.1 {
+                    dot
+                } else {
+                    let dx = fold.1 - dot.0;
+                    (fold.1 + dx, dot.1)
+                }
+            }
+            _ => {
+                if dot.1 < fold.1 {
+                    dot
+                } else {
+                    let dy = fold.1 - dot.1;
+                    (dot.0, fold.1 + dy)
+                }
+            }
+        })
+        .collect::<HashSet<_>>()
 }
 
-fn process_input(input: &str) -> (HashSet<(i32, i32)>, Vec<(i32, i32)>) {
+fn process_input(input: &str) -> (HashSet<(i32, i32)>, Vec<(char, i32)>) {
     let mut dots = HashSet::new();
     let mut folds = Vec::new();
 
@@ -79,14 +76,7 @@ fn process_input(input: &str) -> (HashSet<(i32, i32)>, Vec<(i32, i32)>) {
     s2.lines().for_each(|line| {
         let (_, fold) = line.split_once(" along ").unwrap();
         let (ori, pos) = fold.split_once("=").unwrap();
-
-        let fold = if ori == "x" {
-            (pos.parse::<i32>().unwrap(), i32::MAX)
-        } else {
-            (i32::MAX, pos.parse::<i32>().unwrap())
-        };
-
-        folds.push(fold);
+        folds.push((ori.chars().next().unwrap(), pos.parse::<i32>().unwrap()));
     });
 
     (dots, folds)
