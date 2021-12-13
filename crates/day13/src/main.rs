@@ -3,7 +3,7 @@ use std::collections::HashSet;
 const INPUT: &str = include_str!("../input.txt");
 
 fn main() {
-    println!("{}", day13a(INPUT));
+    println!("{}\n", day13a(INPUT));
     day13b(INPUT);
 }
 
@@ -30,7 +30,7 @@ fn day13b(input: &str) {
         for cell in row {
             let sym = match cell {
                 true => '#',
-                false => '.',
+                false => ' ',
             };
             print!("{}", sym);
         }
