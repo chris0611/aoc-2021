@@ -62,13 +62,10 @@ fn process_input(input: &str) -> (&str, HashMap<(char, char), char>) {
 
     let rules = rules
         .lines()
-        .filter_map(|line| line.split_once(" -> "))
-        .map(|(s, c)| {
-            let mut s_itr = s.chars();
-            (
-                (s_itr.next().unwrap(), s_itr.next().unwrap()),
-                c.chars().nth(0).unwrap(),
-            )
+        .map(|line| {
+            let (p, c) = line.split_once(" -> ").unwrap();
+            let p = p.chars().collect::<Vec<_>>();
+            ((p[0], p[1]), c.chars().next().unwrap())
         })
         .collect::<HashMap<(char, char), char>>();
 
