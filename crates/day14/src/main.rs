@@ -17,7 +17,7 @@ fn day14(input: &str, iters: usize) -> usize {
         .collect::<HashMap<(char, char), usize>>();
 
     for _ in 0..iters {
-        counts = update_polymer(counts, &rules);
+        update_polymer(&mut counts, &rules);
     }
 
     let (max, min) = get_max_and_min(counts);
@@ -42,23 +42,19 @@ fn get_max_and_min(counts: HashMap<(char, char), usize>) -> (usize, usize) {
         })
 }
 
-fn update_polymer(
-    counts: HashMap<(char, char), usize>,
-    rules: &HashMap<(char, char), char>,
-) -> HashMap<(char, char), usize> {
-    let mut new_counts = HashMap::new();
-
-    for ((c0, c1), cnt) in counts {
+fn update_polymer(counts: &mut HashMap<(char, char), usize>, rules: &HashMap<(char, char), char>) {
+    for ((c0, c1), cnt) in counts.clone().into_iter() {
         let c = *rules.get(&(c0, c1)).unwrap();
 
-        let n1 = new_counts.entry((c0, c)).or_insert(0);
+        let n0 = counts.entry((c0, c1)).or_insert(0);
+        *n0 -= cnt;
+
+        let n1 = counts.entry((c0, c)).or_insert(0);
         *n1 += cnt;
 
-        let n2 = new_counts.entry((c, c1)).or_insert(0);
+        let n2 = counts.entry((c, c1)).or_insert(0);
         *n2 += cnt;
     }
-
-    new_counts
 }
 
 fn process_input(input: &str) -> (&str, HashMap<(char, char), char>) {
