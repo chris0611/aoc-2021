@@ -32,9 +32,14 @@ fn get_max_and_min(counts: HashMap<(char, char), usize>) -> (usize, usize) {
         alphabet[c1 as u8 as usize] += cnt;
     }
 
-    alphabet.into_iter().fold((usize::MIN, usize::MAX), |(max, min), n| {
-        (if n > max { n } else { max }, if (n != 0) && (n < min) { n } else { min })
-    })
+    alphabet
+        .into_iter()
+        .fold((usize::MIN, usize::MAX), |(max, min), n| {
+            (
+                if n > max { n } else { max },
+                if (n != 0) && (n < min) { n } else { min },
+            )
+        })
 }
 
 fn update_polymer(
