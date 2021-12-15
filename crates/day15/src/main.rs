@@ -8,19 +8,15 @@ fn main() {
 }
 
 fn day15a(input: &str) -> i16 {
-    let cave = process_input(input);
-
-    a_star((cave.len() as i16 - 1, cave.len() as i16 - 1), &cave)
+    search(&process_input(input))
 }
 
 fn day15b(input: &str) -> i16 {
-    let cave = expand_cave(process_input(input));
-
-    a_star((cave.len() as i16 - 1, cave.len() as i16 - 1), &cave)
+    search(&expand_cave(process_input(input)))
 }
 
-// h(n) = Manhattan distance to goal
-fn a_star(goal: (i16, i16), grid: &Vec<Vec<u8>>) -> i16 {
+fn search(grid: &Vec<Vec<u8>>) -> i16 {
+    let goal = (grid.len() as i16 - 1, grid.len() as i16 - 1);
     let mut fringe = BinaryHeap::from([(0, 0, 0)]);
     let mut dist = vec![vec![i16::MAX; grid.len()]; grid.len()];
     dist[0][0] = 0;
@@ -33,14 +29,13 @@ fn a_star(goal: (i16, i16), grid: &Vec<Vec<u8>>) -> i16 {
         }
 
         for n in neighbors(current, grid) {
-            let tent_g_score = dist[current.0 as usize][current.1 as usize]
+            let tent_score = dist[current.0 as usize][current.1 as usize]
                 + grid[n.0 as usize][n.1 as usize] as i16;
 
-            if tent_g_score < dist[n.0 as usize][n.1 as usize] {
-                let f_n = tent_g_score + (goal.0 - n.0) + (goal.1 - n.1);
-                fringe.push((-f_n, n.0, n.1));
+            if tent_score < dist[n.0 as usize][n.1 as usize] {
+                fringe.push((-tent_score, n.0, n.1));
 
-                dist[n.0 as usize][n.1 as usize] = tent_g_score;
+                dist[n.0 as usize][n.1 as usize] = tent_score;
             }
         }
     }
