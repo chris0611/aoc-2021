@@ -11,17 +11,17 @@ fn main() {
 fn day15a(input: &str) -> usize {
     let cave = process_input(input);
 
-    a_star((0, 0), (cave.len() - 1, cave.len() - 1), &cave)
+    a_star((0, 0), (cave.len() as u16 - 1, cave.len() as u16 - 1), &cave)
 }
 
 fn day15b(input: &str) -> usize {
     let cave = expand_cave(process_input(input));
 
-    a_star((0, 0), (cave.len() - 1, cave.len() - 1), &cave)
+    a_star((0, 0), (cave.len() as u16 - 1, cave.len() as u16 - 1), &cave)
 }
 
 // h(n) = Manhattan distance to goal
-fn a_star(start: (usize, usize), goal: (usize, usize), grid: &Vec<Vec<u8>>) -> usize {
+fn a_star(start: (u16, u16), goal: (u16, u16), grid: &Vec<Vec<u8>>) -> usize {
     let mut fringe = BinaryHeap::from([Reverse(start)]);
     let mut in_fringe = HashSet::new();
     in_fringe.insert(start);
@@ -45,9 +45,9 @@ fn a_star(start: (usize, usize), goal: (usize, usize), grid: &Vec<Vec<u8>>) -> u
         in_fringe.remove(&current);
 
         for n in neighbors(current, grid) {
-            let tent_g_score = g_score.get(&current).unwrap() + grid[n.0][n.1] as usize;
+            let tent_g_score = g_score.get(&current).unwrap() + grid[n.0 as usize][n.1 as usize] as u16;
 
-            if tent_g_score < *g_score.get(&n).unwrap_or(&usize::MAX) {
+            if tent_g_score < *g_score.get(&n).unwrap_or(&u16::MAX) {
                 came_from.insert(n, current);
                 g_score.insert(n, tent_g_score);
                 f_score.insert(n, tent_g_score + (goal.0 - n.0) + (goal.1 - n.1));
@@ -95,7 +95,7 @@ fn expand_cave(cave: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
     new_cave
 }
 
-fn neighbors(current: (usize, usize), grid: &Vec<Vec<u8>>) -> Vec<(usize, usize)> {
+fn neighbors(current: (u16, u16), grid: &Vec<Vec<u8>>) -> Vec<(u16, u16)> {
     let mut neighbors = Vec::new();
 
     if current.0 != 0 {
@@ -106,11 +106,11 @@ fn neighbors(current: (usize, usize), grid: &Vec<Vec<u8>>) -> Vec<(usize, usize)
         neighbors.push((current.0, current.1 - 1));
     }
 
-    if current.0 != grid.len() - 1 {
+    if current.0 != grid.len() as u16 - 1 {
         neighbors.push((current.0 + 1, current.1));
     }
 
-    if current.1 != grid.len() - 1 {
+    if current.1 != grid.len() as u16 - 1 {
         neighbors.push((current.0, current.1 + 1));
     }
 
@@ -118,8 +118,8 @@ fn neighbors(current: (usize, usize), grid: &Vec<Vec<u8>>) -> Vec<(usize, usize)
 }
 
 fn reconstruct_path(
-    came_from: HashMap<(usize, usize), (usize, usize)>,
-    current: (usize, usize),
+    came_from: HashMap<(u16, u16), (u16, u16)>,
+    current: (u16, u16),
     grid: &Vec<Vec<u8>>,
 ) -> usize {
     let mut total_path = Vec::from([current]);
@@ -133,7 +133,7 @@ fn reconstruct_path(
 
     total_path
         .into_iter()
-        .fold(0, |acc, p| acc + grid[p.0][p.1] as usize)
+        .fold(0, |acc, p| acc + grid[p.0 as usize][p.1 as usize] as usize)
         - grid[0][0] as usize
 }
 
