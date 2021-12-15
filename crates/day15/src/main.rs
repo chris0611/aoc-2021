@@ -17,22 +17,6 @@ fn day15a(input: &str) -> usize {
 fn day15b(input: &str) -> usize {
     let cave = expand_cave(process_input(input));
 
-    /* for (i, ele) in cave.iter().enumerate() {
-        for (j, val) in ele.iter().enumerate() {
-            print!("{}", val);
-            if (j + 1) % (ele.len() / 5) == 0 {
-                print!("  ");
-            } else {
-                print!(",");
-            }
-        }
-        println!();
-
-        if (i + 1) % (ele.len() / 5) == 0 {
-            println!();
-        }
-    } */
-
     a_star((0, 0), (cave.len() - 1, cave.len() - 1), &cave)
 }
 
