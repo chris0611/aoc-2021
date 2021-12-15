@@ -1,5 +1,4 @@
-use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::BinaryHeap;
 
 const INPUT: &str = include_str!("../input.txt");
 
@@ -8,95 +7,69 @@ fn main() {
     println!("{}", day15b(INPUT));
 }
 
-fn day15a(input: &str) -> usize {
+fn day15a(input: &str) -> i16 {
     let cave = process_input(input);
 
-    a_star((cave.len() as u16 - 1, cave.len() as u16 - 1), &cave)
+    a_star((cave.len() as i16 - 1, cave.len() as i16 - 1), &cave)
 }
 
-fn day15b(input: &str) -> usize {
+fn day15b(input: &str) -> i16 {
     let cave = expand_cave(process_input(input));
 
-    a_star((cave.len() as u16 - 1, cave.len() as u16 - 1), &cave)
+    a_star((cave.len() as i16 - 1, cave.len() as i16 - 1), &cave)
 }
 
 // h(n) = Manhattan distance to goal
-fn a_star(goal: (u16, u16), grid: &Vec<Vec<u8>>) -> usize {
-    let mut fringe = BinaryHeap::from([Reverse((0, 0, 0))]);
-    let mut in_fringe = HashSet::new();
-    in_fringe.insert((0, 0));
+fn a_star(goal: (i16, i16), grid: &Vec<Vec<u8>>) -> i16 {
+    let mut fringe = BinaryHeap::from([(0, 0, 0)]);
+    let mut dist = vec![vec![i16::MAX; grid.len()]; grid.len()];
+    dist[0][0] = 0;
 
-    let mut came_from = HashMap::new();
-
-    let mut g_score = HashMap::new();
-    g_score.insert((0, 0), 0);
-
-    while fringe.len() != 0 {
-        let curr = fringe.peek().unwrap().0;
+    while let Some(curr) = fringe.pop() {
         let current = (curr.1, curr.2);
 
         if current == goal {
-            return reconstruct_path(came_from, current, grid);
+            return -curr.0;
         }
 
-        fringe.pop();
-        in_fringe.remove(&current);
-
         for n in neighbors(current, grid) {
-            let tent_g_score =
-                g_score.get(&current).unwrap() + grid[n.0 as usize][n.1 as usize] as u16;
+            let tent_g_score = dist[current.0 as usize][current.1 as usize]
+                + grid[n.0 as usize][n.1 as usize] as i16;
 
-            if tent_g_score < *g_score.get(&n).unwrap_or(&u16::MAX) {
-                came_from.insert(n, current);
-                g_score.insert(n, tent_g_score);
+            if tent_g_score < dist[n.0 as usize][n.1 as usize] {
+                let f_n = tent_g_score + (goal.0 - n.0) + (goal.1 - n.1);
+                fringe.push((-f_n, n.0, n.1));
 
-                let f_n = tent_g_score + ((goal.0 - n.0) + (goal.1 - n.1)) * 2;
-
-                if !in_fringe.contains(&n) {
-                    fringe.push(Reverse((f_n, n.0, n.1)));
-                    in_fringe.insert(n);
-                }
+                dist[n.0 as usize][n.1 as usize] = tent_g_score;
             }
         }
     }
-    0
+    unreachable!()
 }
 
 fn expand_cave(cave: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
-    let mut new_cave: Vec<Vec<u8>> = Vec::with_capacity(5 * cave.len());
+    (0..(5 * cave.len()))
+        .map(|x| {
+            (0..(5 * cave.len()))
+                .map(|y| {
+                    let x_lvl = (x / cave.len()) as u8;
+                    let y_lvl = (y / cave.len()) as u8;
 
-    for _ in 0..cave.len() * 5 {
-        new_cave.push(vec![0; cave.len() * 5]);
-    }
+                    let risk = cave[x % cave.len()][y % cave.len()] + x_lvl + y_lvl;
 
-    for (i, col) in cave.iter().enumerate() {
-        for (j, v) in col.iter().enumerate() {
-            new_cave[i][j] = *v;
-        }
-    }
-
-    for (i, row) in cave.iter().enumerate() {
-        for (j, col) in row.iter().enumerate() {
-            for s_o in 1..5 {
-                let risk_out = *col + 1 * s_o as u8;
-                let risk_out = if (risk_out % 9) == 0 { 9 } else { risk_out % 9 };
-                new_cave[i][(j + (row.len() * s_o))] = risk_out;
-                new_cave[(i + (row.len() * s_o))][j] = risk_out;
-
-                for s_i in 1..5 {
-                    let risk_in = *col + 1 * s_o as u8 + 1 * s_i as u8;
-                    let risk_in = if (risk_in % 9) == 0 { 9 } else { risk_in % 9 };
-                    new_cave[(i + (row.len() * s_o))][(j + (row.len() * s_i))] = risk_in;
-                }
-            }
-        }
-    }
-
-    new_cave
+                    if risk < 10 {
+                        risk
+                    } else {
+                        risk - 9
+                    }
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>()
 }
 
-fn neighbors(current: (u16, u16), grid: &Vec<Vec<u8>>) -> Vec<(u16, u16)> {
-    let mut neighbors = Vec::new();
+fn neighbors(current: (i16, i16), grid: &Vec<Vec<u8>>) -> Vec<(i16, i16)> {
+    let mut neighbors = Vec::with_capacity(4);
 
     if current.0 != 0 {
         neighbors.push((current.0 - 1, current.1));
@@ -106,35 +79,15 @@ fn neighbors(current: (u16, u16), grid: &Vec<Vec<u8>>) -> Vec<(u16, u16)> {
         neighbors.push((current.0, current.1 - 1));
     }
 
-    if current.0 != grid.len() as u16 - 1 {
+    if current.0 != grid.len() as i16 - 1 {
         neighbors.push((current.0 + 1, current.1));
     }
 
-    if current.1 != grid.len() as u16 - 1 {
+    if current.1 != grid.len() as i16 - 1 {
         neighbors.push((current.0, current.1 + 1));
     }
 
     neighbors
-}
-
-fn reconstruct_path(
-    came_from: HashMap<(u16, u16), (u16, u16)>,
-    current: (u16, u16),
-    grid: &Vec<Vec<u8>>,
-) -> usize {
-    let mut total_path = Vec::from([current]);
-
-    let mut tmp = current;
-
-    while came_from.contains_key(&tmp) {
-        tmp = *came_from.get(&tmp).unwrap();
-        total_path.push(tmp);
-    }
-
-    total_path
-        .into_iter()
-        .fold(0, |acc, p| acc + grid[p.0 as usize][p.1 as usize] as usize)
-        - grid[0][0] as usize
 }
 
 fn process_input(input: &str) -> Vec<Vec<u8>> {
