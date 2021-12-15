@@ -11,39 +11,29 @@ fn main() {
 fn day15a(input: &str) -> usize {
     let cave = process_input(input);
 
-    a_star(
-        (0, 0),
-        (cave.len() as u16 - 1, cave.len() as u16 - 1),
-        &cave,
-    )
+    a_star((cave.len() as u16 - 1, cave.len() as u16 - 1), &cave)
 }
 
 fn day15b(input: &str) -> usize {
     let cave = expand_cave(process_input(input));
 
-    a_star(
-        (0, 0),
-        (cave.len() as u16 - 1, cave.len() as u16 - 1),
-        &cave,
-    )
+    a_star((cave.len() as u16 - 1, cave.len() as u16 - 1), &cave)
 }
 
 // h(n) = Manhattan distance to goal
-fn a_star(start: (u16, u16), goal: (u16, u16), grid: &Vec<Vec<u8>>) -> usize {
-    let mut fringe = BinaryHeap::from([Reverse(start)]);
+fn a_star(goal: (u16, u16), grid: &Vec<Vec<u8>>) -> usize {
+    let mut fringe = BinaryHeap::from([Reverse(((goal.0 + goal.1) * 2, 0, 0))]);
     let mut in_fringe = HashSet::new();
-    in_fringe.insert(start);
+    in_fringe.insert((0, 0));
 
     let mut came_from = HashMap::new();
 
     let mut g_score = HashMap::new();
-    g_score.insert(start, 0);
-
-    let mut f_score = HashMap::new();
-    f_score.insert(start, (goal.0 - start.0) + (goal.1 - start.1));
+    g_score.insert((0, 0), 0);
 
     while fringe.len() != 0 {
-        let current = fringe.peek().unwrap().0;
+        let curr = fringe.peek().unwrap().0;
+        let current = (curr.1, curr.2);
 
         if current == goal {
             return reconstruct_path(came_from, current, grid);
@@ -59,10 +49,11 @@ fn a_star(start: (u16, u16), goal: (u16, u16), grid: &Vec<Vec<u8>>) -> usize {
             if tent_g_score < *g_score.get(&n).unwrap_or(&u16::MAX) {
                 came_from.insert(n, current);
                 g_score.insert(n, tent_g_score);
-                f_score.insert(n, tent_g_score + (goal.0 - n.0) + (goal.1 - n.1));
+
+                let f_n = tent_g_score + ((goal.0 - n.0) + (goal.1 - n.1)) * 2;
 
                 if !in_fringe.contains(&n) {
-                    fringe.push(Reverse(n));
+                    fringe.push(Reverse((f_n, n.0, n.1)));
                     in_fringe.insert(n);
                 }
             }
