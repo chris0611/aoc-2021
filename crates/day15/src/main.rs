@@ -11,13 +11,21 @@ fn main() {
 fn day15a(input: &str) -> usize {
     let cave = process_input(input);
 
-    a_star((0, 0), (cave.len() as u16 - 1, cave.len() as u16 - 1), &cave)
+    a_star(
+        (0, 0),
+        (cave.len() as u16 - 1, cave.len() as u16 - 1),
+        &cave,
+    )
 }
 
 fn day15b(input: &str) -> usize {
     let cave = expand_cave(process_input(input));
 
-    a_star((0, 0), (cave.len() as u16 - 1, cave.len() as u16 - 1), &cave)
+    a_star(
+        (0, 0),
+        (cave.len() as u16 - 1, cave.len() as u16 - 1),
+        &cave,
+    )
 }
 
 // h(n) = Manhattan distance to goal
@@ -45,7 +53,8 @@ fn a_star(start: (u16, u16), goal: (u16, u16), grid: &Vec<Vec<u8>>) -> usize {
         in_fringe.remove(&current);
 
         for n in neighbors(current, grid) {
-            let tent_g_score = g_score.get(&current).unwrap() + grid[n.0 as usize][n.1 as usize] as u16;
+            let tent_g_score =
+                g_score.get(&current).unwrap() + grid[n.0 as usize][n.1 as usize] as u16;
 
             if tent_g_score < *g_score.get(&n).unwrap_or(&u16::MAX) {
                 came_from.insert(n, current);
