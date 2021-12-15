@@ -22,7 +22,7 @@ fn day15b(input: &str) -> usize {
 
 // h(n) = Manhattan distance to goal
 fn a_star(goal: (u16, u16), grid: &Vec<Vec<u8>>) -> usize {
-    let mut fringe = BinaryHeap::from([Reverse(((goal.0 + goal.1) * 2, 0, 0))]);
+    let mut fringe = BinaryHeap::from([Reverse((0, 0, 0))]);
     let mut in_fringe = HashSet::new();
     in_fringe.insert((0, 0));
 
