@@ -1,5 +1,5 @@
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 const INPUT: &str = include_str!("../input.txt");
 
@@ -23,6 +23,8 @@ fn day15b(input: &str) -> usize {
 // h(n) = Manhattan distance to goal
 fn a_star(start: (usize, usize), goal: (usize, usize), grid: &Vec<Vec<u8>>) -> usize {
     let mut fringe = BinaryHeap::from([Reverse(start)]);
+    let mut in_fringe = HashSet::new();
+    in_fringe.insert(start);
 
     let mut came_from = HashMap::new();
 
@@ -40,6 +42,7 @@ fn a_star(start: (usize, usize), goal: (usize, usize), grid: &Vec<Vec<u8>>) -> u
         }
 
         fringe.pop();
+        in_fringe.remove(&current);
 
         for n in neighbors(current, grid) {
             let tent_g_score = g_score.get(&current).unwrap() + grid[n.0][n.1] as usize;
@@ -49,16 +52,13 @@ fn a_star(start: (usize, usize), goal: (usize, usize), grid: &Vec<Vec<u8>>) -> u
                 g_score.insert(n, tent_g_score);
                 f_score.insert(n, tent_g_score + (goal.0 - n.0) + (goal.1 - n.1));
 
-                match fringe.iter().find(|&&x| x.0 == n) {
-                    None => {
-                        fringe.push(Reverse(n));
-                    }
-                    Some(_) => (),
+                if !in_fringe.contains(&n) {
+                    fringe.push(Reverse(n));
+                    in_fringe.insert(n);
                 }
             }
         }
     }
-
     0
 }
 
