@@ -5,10 +5,33 @@ const INPUT: &str = include_str!("../input.txt");
 
 fn main() {
     println!("{}", day15a(INPUT));
+    println!("{}", day15b(INPUT));
 }
 
 fn day15a(input: &str) -> usize {
     let cave = process_input(input);
+
+    a_star((0, 0), (cave.len() - 1, cave.len() - 1), &cave)
+}
+
+fn day15b(input: &str) -> usize {
+    let cave = expand_cave(process_input(input));
+
+    /* for (i, ele) in cave.iter().enumerate() {
+        for (j, val) in ele.iter().enumerate() {
+            print!("{}", val);
+            if (j + 1) % (ele.len() / 5) == 0 {
+                print!("  ");
+            } else {
+                print!(",");
+            }
+        }
+        println!();
+
+        if (i + 1) % (ele.len() / 5) == 0 {
+            println!();
+        }
+    } */
 
     a_star((0, 0), (cave.len() - 1, cave.len() - 1), &cave)
 }
@@ -55,6 +78,39 @@ fn a_star(start: (usize, usize), goal: (usize, usize), grid: &Vec<Vec<u8>>) -> u
     0
 }
 
+fn expand_cave(cave: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
+    let mut new_cave: Vec<Vec<u8>> = Vec::with_capacity(5 * cave.len());
+
+    for _ in 0..cave.len() * 5 {
+        new_cave.push(vec![0; cave.len() * 5]);
+    }
+
+    for (i, col) in cave.iter().enumerate() {
+        for (j, v) in col.iter().enumerate() {
+            new_cave[i][j] = *v;
+        }
+    }
+
+    for (i, row) in cave.iter().enumerate() {
+        for (j, col) in row.iter().enumerate() {
+            for s_o in 1..5 {
+                let risk_out = *col + 1 * s_o as u8;
+                let risk_out = if (risk_out % 9) == 0 { 9 } else { risk_out % 9 };
+                new_cave[i][(j + (row.len() * s_o))] = risk_out;
+                new_cave[(i + (row.len() * s_o))][j] = risk_out;
+
+                for s_i in 1..5 {
+                    let risk_in = *col + 1 * s_o as u8 + 1 * s_i as u8;
+                    let risk_in = if (risk_in % 9) == 0 { 9 } else { risk_in % 9 };
+                    new_cave[(i + (row.len() * s_o))][(j + (row.len() * s_i))] = risk_in;
+                }
+            }
+        }
+    }
+
+    new_cave
+}
+
 fn neighbors(current: (usize, usize), grid: &Vec<Vec<u8>>) -> Vec<(usize, usize)> {
     let mut neighbors = Vec::new();
 
@@ -93,7 +149,8 @@ fn reconstruct_path(
 
     total_path
         .into_iter()
-        .fold(0, |acc, p| acc + grid[p.0][p.1] as usize) - grid[0][0] as usize
+        .fold(0, |acc, p| acc + grid[p.0][p.1] as usize)
+        - grid[0][0] as usize
 }
 
 fn process_input(input: &str) -> Vec<Vec<u8>> {
@@ -112,6 +169,14 @@ mod tests {
     fn part_a() {
         let expected = 40;
         let actual = day15a(TEST_INPUT);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn part_b() {
+        let expected = 315;
+        let actual = day15b(TEST_INPUT);
 
         assert_eq!(expected, actual);
     }
